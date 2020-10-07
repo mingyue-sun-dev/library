@@ -1,81 +1,77 @@
-let myLibrary = [];
-const addButton = document.querySelector('#add-button');
-const innerAddButton = document.querySelector('#inner-add-button');
+const books = [];
+const formButton = document.querySelector('.fa-plus-circle');
+const addingButton = document.querySelector('form button');
+const form = document.querySelector('.adding-form');
 
-addButton.addEventListener('click', getForm);
-innerAddButton.addEventListener('click', addBookToLibrary);
-
-function Book(title, author, pages, read) {
+function Book(title, author, pageNum, readStatus) {
 	this.title = title;
 	this.author = author;
-	this.pages = pages;
-	this.read = read;
-	this.info = function() {
-		return `${title} by ${author}, ${pages} pages, ${this.read}`;
-	};
+	this.pageNum = pageNum;
+	this.readStatus = readStatus;
 }
 
-function addBookToLibrary() {
-	const title = document.querySelector('#title').value;
-	const author = document.querySelector('#author').value;
-	const pages = document.querySelector('#pages').value;
-	const read = document.querySelector('input[name="read"]:checked').value;
-	const newBook = new Book(title, author, pages, read);
-	myLibrary.push(newBook);
-	document.querySelector('#title').value = '';
-	document.querySelector('#author').value = '';
-	document.querySelector('#pages').value = '';
-	document.querySelector('input[name="read"]:checked').checked = false;
-	displayBooks();
-	hideForm();
-}
+const toggleForm = () => {
+	form.style.visibility = form.style.visibility === 'visible' ? 'hidden' : 'visible';
+	formButton.style.visibility = form.style.visibility === 'visible' ? 'hidden' : 'visible';
+};
 
-function displayBooks() {
-	const div = document.querySelector('div');
-	div.textContent = '';
-	for (let book of myLibrary) {
-		const para = document.createElement('p');
-		const removeButton = document.createElement('button');
-		const readButton = document.createElement('button');
-		para.textContent = book.info();
-		removeButton.textContent = 'remove';
-		removeButton.setAttribute('data-index', `${myLibrary.indexOf(book)}`);
-		removeButton.classList.add('remove-buttons');
-		para.appendChild(removeButton);
-		readButton.textContent = 'read';
-		readButton.setAttribute('data-index', `${myLibrary.indexOf(book)}`);
-		readButton.classList.add('read-buttons');
-		para.appendChild(readButton);
-		div.appendChild(para);
+const removeBook = (index) => {
+	books.splice(index, 1);
+	render();
+};
+
+const updateStatus = (index) => {
+	const span = document.querySelector(`span[data-index='${index}']`);
+
+	span.textContent = span.textContent === 'read' ? 'unread' : 'read';
+};
+
+const render = () => {
+	const main = document.querySelector('main');
+	const addingCard = document.querySelector('.adding-card');
+	
+	while (main.childNodes.length > 2) {
+	    main.removeChild(main.firstChild);
 	}
-	const removeButtons = document.querySelectorAll('.remove-buttons');
-	const readButtons = document.querySelectorAll('.read-buttons');
-	removeButtons.forEach(button => button.addEventListener('click', removeBook));
-	readButtons.forEach(button => button.addEventListener('click', changeRead));
-}
 
-function getForm() {
-	const form = document.querySelector('form');
-	form.style.visibility = 'visible';
-}
+	books.forEach((book, index) => {
+		const card = document.createElement('section');
 
-function hideForm() {
-	const form = document.querySelector('form');
-	form.style.visibility = 'hidden';
-}
+		card.classList.add('card');
 
-function removeBook() {
-	bookIndex = Number(this.getAttribute('data-index'));
-	myLibrary.splice(bookIndex, 1);
-	displayBooks();
-}
+		card.innerHTML = `
+			<i class="fas fa-window-close fa-lg" data-index='${index}' onClick='removeBook(${index})'></i>
+			<h2>${book.title}</h2>
+			<p>${book.author}</p>
+			<p>Pages: ${book.pageNum}</p>
+			<p>Status: <span data-index='${index}'>${book.readStatus}</span></p>
+			<button data-index='${index}' onClick='updateStatus(${index})'>Update</button>
+		`;
 
-function changeRead() {
-	bookIndex = Number(this.getAttribute('data-index'));
-	if (myLibrary[bookIndex].read === 'read') {
-		myLibrary[bookIndex].read = 'unread';
-	} else {
-		myLibrary[bookIndex].read = 'read';
-	}
-	displayBooks();
-}
+		main.insertBefore(card, addingCard);
+	});
+};
+
+const addBook = () => {
+	const title = document.querySelector('#title');
+	const author = document.querySelector('#author');
+	const pageNum = document.querySelector('#page-num');
+	const readStatus = document.querySelector('input[name="read-status"]:checked');
+
+	const newBook = new Book(title.value, author.value, pageNum.value, readStatus.value);
+
+	books.push(newBook);
+
+	render();
+
+	title.value = '';
+	author.value = '';
+	pageNum.value = '';
+	readStatus.checked = false;
+
+	toggleForm();
+};
+
+formButton.addEventListener('click', toggleForm);
+
+addingButton.addEventListener('click', addBook);
