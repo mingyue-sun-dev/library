@@ -15,12 +15,12 @@ const toggleForm = () => {
 	formButton.style.visibility = form.style.visibility === 'visible' ? 'hidden' : 'visible';
 };
 
-const removeBook = (index) => {
+const removeBook = index => {
 	books.splice(index, 1);
 	render();
 };
 
-const updateStatus = (index) => {
+const updateStatus = index => {
 	const span = document.querySelector(`span[data-index='${index}']`);
 
 	span.textContent = span.textContent === 'read' ? 'unread' : 'read';
